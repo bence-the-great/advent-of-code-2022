@@ -63,12 +63,12 @@ def moves(raw_moves: str) -> Generator[Move, None, None]:
         yield Move(raw_move)
 
 
-def apply_move_crate_mover_9000(self: Stacks, move: Move):
+def crate_mover_9000(self: Stacks, move: Move):
     for _ in range(move.number_of_crates):
         self[move.destination].appendleft(self[move.origin].popleft())
 
 
-def apply_move_crate_mover_9001(self: Stacks, move: Move):
+def crate_mover_9001(self: Stacks, move: Move):
     crates_picked_up = [self[move.origin].popleft() for _ in range(move.number_of_crates)]
     self[move.destination].extendleft(reversed(crates_picked_up))
 
@@ -85,7 +85,7 @@ def solve(raw_crate_rearrangements: str, stacks: Stacks) -> str:
 
 
 if __name__ == "__main__":
-    solution_part1 = solve(real_input, Stacks(apply_move_crate_mover_9000))
+    solution_part1 = solve(real_input, Stacks(crate_mover_9000))
     print(f"{solution_part1 = }")
-    solution_part2 = solve(real_input, Stacks(apply_move_crate_mover_9001))
+    solution_part2 = solve(real_input, Stacks(crate_mover_9001))
     print(f"{solution_part2 = }")
