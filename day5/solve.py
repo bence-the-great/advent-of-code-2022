@@ -20,7 +20,7 @@ class Move:
 
 
 class Stacks(list):
-    apply_move_function: Callable[[Move], None]
+    apply_move_function: Callable[["Stacks", Move], None]
 
     def __init__(self, apply_move_function: Callable[["Stacks", Move], None]) -> None:
         self.apply_move_function = apply_move_function
