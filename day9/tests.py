@@ -90,10 +90,3 @@ def test_tail_follow_algorithm_should_move_diagonally(
 
     assert tail == expected_tail
     assert visited_positions == expected_visited_positions
-
-
-def test_dummy():
-    head = Position(x=4, y=1)
-    tail = Position(x=0, y=0)
-
-    tail.follow(head)
