@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Generator
-from inputs import test_input, real_input
+from inputs import test_input, test_input_2, real_input
 
 
 def direction(distance: int) -> int:
@@ -12,6 +12,15 @@ def direction(distance: int) -> int:
         return 0
     else:
         return 1
+
+
+def generate_n_positions(n: int) -> list[Position]:
+    positions = []
+
+    for _ in range(n):
+        positions.append(Position())
+
+    return positions
 
 
 class Direction(Enum):
@@ -79,13 +88,17 @@ class Position:
 
 @dataclass
 class World:
-    head: Position = field(init=False, default_factory=Position)
-    tail: Position = field(init=False, default_factory=Position)
+    knots: list[Position]
     visited: set[Position] = field(default_factory=set)
 
     def apply(self, move: Move) -> None:
-        self.head.apply(move)
-        self.visited.update(self.tail.follow(self.head))
+        for i, knot in enumerate(self.knots):
+            if i == 0:
+                knot.apply(move)
+            else:
+                visited_positions = list(knot.follow(self.knots[i - 1]))
+                if i == (len(self.knots) - 1):
+                    self.visited.update(visited_positions)
 
 
 def parse_moves(raw_moves: str) -> Generator[Move, None, None]:
@@ -93,15 +106,23 @@ def parse_moves(raw_moves: str) -> Generator[Move, None, None]:
         yield Move(raw_move)
 
 
-def solve(moves: Generator[Move, None, None]) -> int:
-    world = World()
+def granularize_move(move: Move) -> Generator[Move, None, None]:
+    for _ in range(move.steps):
+        yield Move(f"{move.direction.value} 1")
+
+
+def solve(number_of_knots: int, moves: Generator[Move, None, None]) -> tuple[int, int]:
+    world = World(knots=generate_n_positions(number_of_knots))
 
     for move in moves:
-        world.apply(move)
+        for step in granularize_move(move):
+            world.apply(step)
 
     return len(world.visited)
 
 
 if __name__ == "__main__":
-    visited_positions = solve(parse_moves(real_input))
-    print(f"{visited_positions = }")
+    part1 = solve(2, parse_moves(real_input))
+    print(f"{part1 = }")
+    part2 = solve(10, parse_moves(real_input))
+    print(f"{part2 = }")
