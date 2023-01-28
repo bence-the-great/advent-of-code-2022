@@ -12,6 +12,8 @@ TEST_REGEXES = {
     "throw_to": re.compile(r"(?P<outcome>(true|false)): throw to monkey\s*(?P<value>[\d]+)"),
 }
 
+modulo = 1
+
 
 @dataclass
 class Easing:
@@ -84,9 +86,10 @@ class Monkey:
         return self.inspected_number_of_items > other.inspected_number_of_items
 
     def inspect_items(self) -> None:
+        global modulo
         for _ in range(len(self.items)):
             item = self.ease(self.operation.inspect(self.items.popleft()))
-            self.monkeys[self.test.throw_to(item)].items.append(item)
+            self.monkeys[self.test.throw_to(item)].items.append(item % modulo)
             self.inspected_number_of_items += 1
 
 
@@ -124,8 +127,8 @@ def parse_test(raw_test: str) -> MonkeyTest:
     )
 
 
-def parse_monkeys(raw_monkeys: str) -> list[Monkey]:
-    easing_function = lambda item: int(item / 3)
+def parse_monkeys(raw_monkeys: str, easing_function: Callable[[int], int]) -> list[Monkey]:
+    global modulo
     monkeys = []
     lines = raw_monkeys.splitlines()
     current_line_no = 0
@@ -138,10 +141,15 @@ def parse_monkeys(raw_monkeys: str) -> list[Monkey]:
             starting_items = parse_starting_items(lines[current_line_no + 1])
             operation = parse_operation(lines[current_line_no + 2])
             monkey_test = parse_test("\n".join(lines[current_line_no + 3 : current_line_no + 6]))
+            modulo *= monkey_test.value
 
             monkeys.append(
                 Monkey(
-                    items=starting_items, monkeys=monkeys, operation=operation, test=monkey_test, ease=easing_function
+                    items=starting_items,
+                    monkeys=monkeys,
+                    operation=operation,
+                    test=monkey_test,
+                    ease=easing_function,
                 )
             )
             current_line_no += 7
@@ -162,5 +170,7 @@ def solve(monkeys: list[Monkey], rounds: int) -> int:
 
 
 if __name__ == "__main__":
-    monkey_business = solve(parse_monkeys(real_input), rounds=20)
-    print(f"{monkey_business = }")
+    monkey_business_part1 = solve(parse_monkeys(real_input, easing_function=lambda item: item // 3), rounds=20)
+    print(f"{monkey_business_part1 = }")
+    monkey_business_part2 = solve(parse_monkeys(real_input, easing_function=lambda item: item), rounds=10_000)
+    print(f"{monkey_business_part2 = }")
